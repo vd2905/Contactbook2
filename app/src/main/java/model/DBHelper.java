@@ -1,4 +1,4 @@
-package DBHelper;
+package model;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -11,14 +11,14 @@ public class DBHelper extends SQLiteOpenHelper
 {
     public DBHelper(@Nullable Context context)
     {
-        super(context, "ContactBook", null, 1);
+        super(context, "PhoneBook", null, 1);
         Log.d("TTT", "DBHelper: Database Created");
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase)
     {
-        String query="create table Contact (id integer primary key autoincrement,name text,number text)";
+        String query="create table Contactbook (id integer primary key autoincrement,name text,number text,imagePath)";
         sqLiteDatabase.execSQL(query);
         Log.d("TTT", "DBHelper: Table Created");
     }
@@ -28,28 +28,28 @@ public class DBHelper extends SQLiteOpenHelper
 
     }
 
-    public void saveContact(String name, String number)
+    public void saveContact(String name, String number, String imagePath)
     {
-        String query="insert into Contact(name,number) values('"+name+"','"+number+"')";
+        String query="insert into Contactbook(name,number,imagePath) values('"+name+"','"+number+"','"+imagePath+"')";
         SQLiteDatabase sqLiteDatabase=getWritableDatabase();
         sqLiteDatabase.execSQL(query);
     }
-    public void updateContact(int id, String name, String number)
+    public void updateContact(int id, String name, String number, String imagePath)
     {
-        String query = "update Contact set name = '"+name+"',number = '"+number+"' where id = '"+id+"'";
+        String query = "update Contactbook set imagePath = '"+imagePath+"', name = '"+name+"',number = '"+number+"' where id = '"+id+"'";
         SQLiteDatabase sqLiteDatabase=getWritableDatabase();
         sqLiteDatabase.execSQL(query);
 
     }
     public void deleteContact(int id)
     {
-        String query = "delete from Contact where id = '"+id+"'";
+        String query = "delete from Contactbook where id = '"+id+"'";
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
         sqLiteDatabase.execSQL(query);
     }
     public Cursor displayContact()
     {
-        String query="select * from Contact";
+        String query="select * from Contactbook";
         SQLiteDatabase sqLiteDatabase=getReadableDatabase();
         Cursor cursor=sqLiteDatabase.rawQuery(query,null);
         return cursor;

@@ -1,7 +1,9 @@
-package ListAdapter1;
+package Adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,28 +15,31 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.contactbook.Contact;
+import model.Contact;
 import com.example.contactbook.CreateActivity;
 import com.example.contactbook.MainActivity;
 import com.example.contactbook.R;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
-import DBHelper.DBHelper;
+import model.DBHelper;
 
-public class ListAdapter1 extends RecyclerView.Adapter<ListAdapter1.ListHolder>
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListHolder>
 {
     MainActivity mainActivity;
     ArrayList<Contact> contactList;
 
-    public ListAdapter1(MainActivity mainActivity, ArrayList<Contact> contactList) {
+    public ListAdapter(MainActivity mainActivity, ArrayList<Contact> contactList) {
         this.mainActivity = mainActivity;
         this.contactList = contactList;
     }
 
     @NonNull
     @Override
-    public ListAdapter1.ListHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public ListAdapter.ListHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
         View view= LayoutInflater.from(mainActivity).inflate(R.layout.main_item,parent,false);
         ListHolder holder=new ListHolder(view);
@@ -42,19 +47,21 @@ public class ListAdapter1 extends RecyclerView.Adapter<ListAdapter1.ListHolder>
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ListAdapter1.ListHolder holder, @SuppressLint("RecyclerView") int position) {
-        Contact contact1=contactList.get(position);
-        int id=contact1.getId();
-        String name=contact1.getName();
-        String number=contact1.getNumber();
+    public void onBindViewHolder(@NonNull ListAdapter.ListHolder holder, @SuppressLint("RecyclerView") int position) {
+        Contact contact=contactList.get(position);
+        int id=contact.getId();
+        String name=contact.getName();
+        String number=contact.getNumber();
+        String imagePath=contact.getImagePath();
         holder.Name.setText(""+name);
         holder.Number.setText(""+number);
+        loadImageFromStorage(contactList.get(position).getImagePath(),holder.imageView);
 
-        holder.imageView.setOnClickListener(new View.OnClickListener() {
+        holder.menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                PopupMenu popupMenu = new PopupMenu(mainActivity,holder.imageView);
+                PopupMenu popupMenu = new PopupMenu(mainActivity,holder.menu);
                 mainActivity.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -66,6 +73,7 @@ public class ListAdapter1 extends RecyclerView.Adapter<ListAdapter1.ListHolder>
                             intent.putExtra("id",id);
                             intent.putExtra("name",name);
                             intent.putExtra("number",number);
+                            intent.putExtra("imagePath",imagePath);
                             mainActivity.startActivity(intent);
                             mainActivity.finish();
                         }
@@ -91,13 +99,28 @@ public class ListAdapter1 extends RecyclerView.Adapter<ListAdapter1.ListHolder>
 
     public class ListHolder extends RecyclerView.ViewHolder {
         TextView Name,Number;
-        ImageView imageView;
+        ImageView menu,imageView;
         public ListHolder(@NonNull View itemView) {
             super(itemView);
             Name = itemView.findViewById(R.id.main_name);
             Number = itemView.findViewById(R.id.main_number);
+            menu = itemView.findViewById(R.id.menu);
             imageView = itemView.findViewById(R.id.imageView);
 
         }
+    }
+    private void loadImageFromStorage(String path,ImageView imageView)
+    {
+
+        try {
+            File f=new File(path);
+            Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+            imageView.setImageBitmap(bitmap);
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 }

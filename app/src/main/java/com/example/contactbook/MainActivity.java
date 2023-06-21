@@ -9,15 +9,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ListView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
-import DBHelper.DBHelper;
-import ListAdapter.ListAdapter;
-import ListAdapter1.ListAdapter1;
+import model.Contact;
+import model.DBHelper;
+import Adapter.ListAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    void getData()
+    private void getData()
     {
         DBHelper dbHelper=new DBHelper(MainActivity.this);
         Cursor cursor= dbHelper.displayContact();
@@ -55,23 +54,22 @@ public class MainActivity extends AppCompatActivity {
             int id = cursor.getInt(0);
             String name = cursor.getString(1);
             String number = cursor.getString(2);
-
-            Contact contact1=new Contact(id,name,number);
-            contactList.add(contact1);
+            String imagePath = cursor.getString(3);
+            Contact contact=new Contact(id,name,number,imagePath);
+            contactList.add(contact);
         }
-        ListAdapter1 adapter1 = new ListAdapter1(MainActivity.this,contactList);
+        ListAdapter adapter = new ListAdapter(MainActivity.this,contactList);
         LinearLayoutManager manager = new LinearLayoutManager(getApplicationContext());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(manager);
-        recyclerView.setAdapter(adapter1);
+        recyclerView.setAdapter(adapter);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 swipeRefreshLayout.setRefreshing(true);
-                recyclerView.setAdapter(adapter1);
+                recyclerView.setAdapter(adapter);
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
-
     }
 }
