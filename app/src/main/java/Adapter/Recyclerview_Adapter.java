@@ -15,7 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import model.Contact;
+import model.Contact_model;
 import com.example.contactbook.CreateActivity;
 import com.example.contactbook.MainActivity;
 import com.example.contactbook.R;
@@ -25,21 +25,21 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
-import model.DBHelper;
+import model.Database;
 
-public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListHolder>
+public class Recyclerview_Adapter extends RecyclerView.Adapter<Recyclerview_Adapter.ListHolder>
 {
     MainActivity mainActivity;
-    ArrayList<Contact> contactList;
+    ArrayList<Contact_model> contactList;
 
-    public ListAdapter(MainActivity mainActivity, ArrayList<Contact> contactList) {
+    public Recyclerview_Adapter(MainActivity mainActivity, ArrayList<Contact_model> contactList) {
         this.mainActivity = mainActivity;
         this.contactList = contactList;
     }
 
     @NonNull
     @Override
-    public ListAdapter.ListHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public Recyclerview_Adapter.ListHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
         View view= LayoutInflater.from(mainActivity).inflate(R.layout.main_item,parent,false);
         ListHolder holder=new ListHolder(view);
@@ -47,8 +47,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListHolder>
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ListAdapter.ListHolder holder, @SuppressLint("RecyclerView") int position) {
-        Contact contact=contactList.get(position);
+    public void onBindViewHolder(@NonNull Recyclerview_Adapter.ListHolder holder, @SuppressLint("RecyclerView") int position) {
+        Contact_model contact=contactList.get(position);
         int id=contact.getId();
         String name=contact.getName();
         String number=contact.getNumber();
@@ -79,7 +79,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListHolder>
                         }
                         else if(menuItem.getItemId()==R.id.delete)
                         {
-                            DBHelper dbHelper = new DBHelper(mainActivity);
+                            Database dbHelper = new Database(mainActivity);
                             dbHelper.deleteContact(id);
                             contactList.remove(position);
                             notifyDataSetChanged();

@@ -1,13 +1,13 @@
 package model;
 
-public class Contact
+public class Contact_model
 {
     int id;
     String name;
     String number;
     String imagePath;
 
-    public Contact(int id, String name, String number, String imagePath) {
+    public Contact_model(int id, String name, String number, String imagePath) {
         this.id = id;
         this.name = name;
         this.number = number;

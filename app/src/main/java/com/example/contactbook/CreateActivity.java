@@ -1,11 +1,14 @@
 package com.example.contactbook;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -15,6 +18,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.contactbook.databinding.ActivityCreateBinding;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -24,16 +29,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import model.DBHelper;
+import model.Database;
 
 public class CreateActivity extends AppCompatActivity {
 
     private static final int CAMERA_REQUEST = 100;
-    TextInputEditText ename,enumber;
-    Button btnSave;
-    ImageView imageView;
-    TextView textView;
-    DBHelper dbHelper;
+    private static final int GALLERY_REQUEST = 200;
+    ActivityCreateBinding binding;
+    Database database;
     int id;
     String name;
     String number;
@@ -42,27 +45,60 @@ public class CreateActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create);
 
-        dbHelper=new DBHelper(CreateActivity.this);
-        ename=findViewById(R.id.ename);
-        enumber=findViewById(R.id.enumber);
-        btnSave=findViewById(R.id.btnSave);
-        imageView=findViewById(R.id.imageView);
-        textView=findViewById(R.id.txt);
+        database = new Database(CreateActivity.this);
 
-        imageView.setOnClickListener(new View.OnClickListener() {
+        binding = ActivityCreateBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+
+        binding.addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent cameraIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent,CAMERA_REQUEST);
+                AlertDialog.Builder builder = new AlertDialog.Builder(CreateActivity.this);
+                builder.setTitle("Choose picture");
+                builder.setPositiveButton("Gallery", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        Intent cameraIntent= new Intent(MediaStore.ACTION_PICK_IMAGES);
+                        startActivityForResult(cameraIntent,GALLERY_REQUEST);
+                    }
+                });
+                builder.setNegativeButton("Camera", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which)
+                    {
+                        Intent galleryIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(galleryIntent,CAMERA_REQUEST);
+                    }
+                });
+                builder.show();
+
             }
         });
-        textView.setOnClickListener(new View.OnClickListener() {
+        binding.addPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent cameraIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent,CAMERA_REQUEST);
+                AlertDialog.Builder builder = new AlertDialog.Builder(CreateActivity.this);
+                builder.setTitle("Choose picture");
+                builder.setPositiveButton("Gallery", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        Intent cameraIntent= new Intent(MediaStore.ACTION_PICK_IMAGES);
+                        startActivityForResult(cameraIntent,GALLERY_REQUEST);
+                    }
+                });
+                builder.setNegativeButton("Camera", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which)
+                    {
+                        Intent galleryIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(galleryIntent,CAMERA_REQUEST);
+                    }
+                });
+                builder.show();
             }
         });
 
@@ -73,29 +109,29 @@ public class CreateActivity extends AppCompatActivity {
 
         if(getIntent().getExtras()!=null)
         {
-            ename.setText(""+name);
-            enumber.setText(""+number);
+            binding.ename.setText(""+name);
+            binding.enumber.setText(""+number);
             loadImageFromStorage(imagePath);
         }
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
+        binding.btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 imagePath=imagePath+"/"+imageName;
-                String name=ename.getText().toString();
-                String number=enumber.getText().toString();
+                String name=binding.ename.getText().toString();
+                String number=binding.enumber.getText().toString();
 
                 if(getIntent().getExtras()==null)
                 {
-                    DBHelper dbHelper=new DBHelper(CreateActivity.this);
-                    dbHelper.saveContact(name,number,imagePath);
+                    database = new Database(CreateActivity.this);
+                    database.saveContact(name,number,imagePath);
                     Intent intent = new Intent(CreateActivity.this,MainActivity.class);
                     startActivity(intent);
                     finish();
                 }
                 else {
-                    DBHelper dbHelper=new DBHelper(CreateActivity.this);
-                    dbHelper.updateContact(id,name,number,imagePath);
+                    database=new Database(CreateActivity.this);
+                    database.updateContact(id,name,number,imagePath);
                     Intent intent = new Intent(CreateActivity.this,MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -107,11 +143,19 @@ public class CreateActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
+        {
             Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(bitmap);
+            binding.addImage.setImageBitmap(bitmap);
             imagePath=saveToInternalStorage(bitmap);
         }
+        else if(requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK)
+        {
+            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+            binding.addImage.setImageBitmap(bitmap);
+            imagePath=saveToInternalStorage(bitmap);
+        }
+
     }
     private String saveToInternalStorage(Bitmap bitmapImage){
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
@@ -142,7 +186,7 @@ public class CreateActivity extends AppCompatActivity {
         try {
             File f=new File(path);
             Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
-            imageView.setImageBitmap(bitmap);
+            binding.addImage.setImageBitmap(bitmap);
         }
         catch (FileNotFoundException e)
         {

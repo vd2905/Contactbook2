@@ -10,32 +10,34 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.contactbook.databinding.ActivityMainBinding;
 
 import java.util.ArrayList;
 
-import model.Contact;
-import model.DBHelper;
-import Adapter.ListAdapter;
+import model.Contact_model;
+import model.Database;
+import Adapter.Recyclerview_Adapter;
 
 public class MainActivity extends AppCompatActivity {
 
+    ActivityMainBinding binding;
     RecyclerView recyclerView;
-    ArrayList<Contact> contactList=new ArrayList<>();
-    FloatingActionButton btn;
+    ArrayList<Contact_model> contactList=new ArrayList<>();
     SwipeRefreshLayout swipeRefreshLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         recyclerView=findViewById(R.id.recyclerview);
         swipeRefreshLayout=findViewById(R.id.swipeLayout);
-        getData();
-        btn=findViewById(R.id.fab);
+        DisplayData();
 
-        btn.setOnClickListener(new View.OnClickListener() {
+        binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this,CreateActivity.class);
@@ -44,10 +46,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private void getData()
+    private void DisplayData()
     {
-        DBHelper dbHelper=new DBHelper(MainActivity.this);
-        Cursor cursor= dbHelper.displayContact();
+        Database database = new Database(MainActivity.this);
+        Cursor cursor= database.displayContact();
         contactList.clear();
         while (cursor.moveToNext())
         {
@@ -55,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
             String name = cursor.getString(1);
             String number = cursor.getString(2);
             String imagePath = cursor.getString(3);
-            Contact contact=new Contact(id,name,number,imagePath);
-            contactList.add(contact);
+            Contact_model contact_model =new Contact_model(id,name,number,imagePath);
+            contactList.add(contact_model);
         }
-        ListAdapter adapter = new ListAdapter(MainActivity.this,contactList);
+        Recyclerview_Adapter adapter = new Recyclerview_Adapter(MainActivity.this,contactList);
         LinearLayoutManager manager = new LinearLayoutManager(getApplicationContext());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(manager);

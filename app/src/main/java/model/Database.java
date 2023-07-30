@@ -7,9 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-public class DBHelper extends SQLiteOpenHelper
+public class Database extends SQLiteOpenHelper
 {
-    public DBHelper(@Nullable Context context)
+    public Database(@Nullable Context context)
     {
         super(context, "PhoneBook", null, 1);
         Log.d("TTT", "DBHelper: Database Created");
