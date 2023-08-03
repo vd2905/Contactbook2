@@ -1,26 +1,19 @@
 package com.example.contactbook;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.contactbook.databinding.ActivityCreateBinding;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +27,6 @@ import model.Database;
 public class CreateActivity extends AppCompatActivity {
 
     private static final int CAMERA_REQUEST = 100;
-    private static final int GALLERY_REQUEST = 200;
     ActivityCreateBinding binding;
     Database database;
     int id;
@@ -50,55 +42,11 @@ public class CreateActivity extends AppCompatActivity {
 
         binding = ActivityCreateBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-
         binding.addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CreateActivity.this);
-                builder.setTitle("Choose picture");
-                builder.setPositiveButton("Gallery", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        Intent cameraIntent= new Intent(MediaStore.ACTION_PICK_IMAGES);
-                        startActivityForResult(cameraIntent,GALLERY_REQUEST);
-                    }
-                });
-                builder.setNegativeButton("Camera", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which)
-                    {
-                        Intent galleryIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(galleryIntent,CAMERA_REQUEST);
-                    }
-                });
-                builder.show();
-
-            }
-        });
-        binding.addPicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CreateActivity.this);
-                builder.setTitle("Choose picture");
-                builder.setPositiveButton("Gallery", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        Intent cameraIntent= new Intent(MediaStore.ACTION_PICK_IMAGES);
-                        startActivityForResult(cameraIntent,GALLERY_REQUEST);
-                    }
-                });
-                builder.setNegativeButton("Camera", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which)
-                    {
-                        Intent galleryIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(galleryIntent,CAMERA_REQUEST);
-                    }
-                });
-                builder.show();
+                Intent galleryIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(galleryIntent,CAMERA_REQUEST);
             }
         });
 
@@ -129,13 +77,6 @@ public class CreateActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 }
-                else {
-                    database=new Database(CreateActivity.this);
-                    database.updateContact(id,name,number,imagePath);
-                    Intent intent = new Intent(CreateActivity.this,MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
             }
         });
     }
@@ -144,12 +85,6 @@ public class CreateActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
-        {
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            binding.addImage.setImageBitmap(bitmap);
-            imagePath=saveToInternalStorage(bitmap);
-        }
-        else if(requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK)
         {
             Bitmap bitmap = (Bitmap) data.getExtras().get("data");
             binding.addImage.setImageBitmap(bitmap);
@@ -181,8 +116,7 @@ public class CreateActivity extends AppCompatActivity {
         }
         return directory.getAbsolutePath();
     }
-    private void loadImageFromStorage(String path)
-    {
+    private void loadImageFromStorage(String path) {
         try {
             File f=new File(path);
             Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
